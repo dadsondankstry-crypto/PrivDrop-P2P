@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PrivDrop PWA</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#007aff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        :root { --blue: #007aff; --bg: #f5f5f7; --grey: #86868b; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        .card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 24px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; border: 1px solid rgba(255,255,255,0.3); }
+
+        #status { color: var(--grey); font-size: 14px; margin-bottom: 20px; min-height: 45px; }
+
+        /* Estilo da Barra de Progresso */
+        .progress-wrapper { width: 100%; background: #e5e5ea; border-radius: 10px; height: 10px; margin: 10px 0; display: none; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: var(--blue); transition: width 0.1s linear; }
+
+        .drop-area { border: 2px dashed #d2d2d7; border-radius: 15px; padding: 30px; cursor: pointer; background: rgba(255,255,255,0.4); }
+        .btn { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 12px; width: 100%; cursor: pointer; font-weight: 600; margin-top: 15px; display: none; }
+        
+        #qrcode { margin: 20px auto; display: inline-block; padding: 10px; background: white; border-radius: 10px; }
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>PrivDrop</h1>
+        <div id="status">A aguardar ID...</div>
+        
+        <div class="progress-wrapper" id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+
+        <div id="conn-card">
+            <div id="qrcode"></div>
+            <button class="btn" id="btn-scan" style="display: block; background: var(--grey);">Usar Câmara</button>
+            <div id="reader"></div>
+        </div>
+
+        <div id="transfer-card" style="display: none;">
+            <div class="drop-area" onclick="document.getElementById('file-input').click()">
+                <div style="font-size: 30px;">📂</div>
+                <p id="drop-text">Selecionar ficheiros</p>
+                <input type="file" id="file-input" multiple style="display: none;">
+            </div>
+            <div id="file-list" style="font-size: 12px; margin-top: 10px; text-align: left;"></div>
+            <button class="btn" id="btn-send" onclick="sendAllFiles()">Enviar Tudo</button>
+        </div>
+    </div>
+
+    <script>
+        const peer = new Peer();
+        let conn;
+        let selectedFiles = [];
+        const statusLbl = document.getElementById('status');
+        const pBar = document.getElementById('progress-bar');
+        const pCont = document.getElementById('progress-container');
+        const CHUNK_SIZE = 16384; 
+
+        peer.on('open', id => {
+            statusLbl.innerText = "ID: " + id;
+            const url = window.location.href.split('?')[0] + "?peer=" + id;
+            new QRCode(document.getElementById("qrcode"), { text: url, width: 150, height: 150 });
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('peer')) connectTo(urlParams.get('peer'));
+        });
+
+        function connectTo(remoteId) {
+            statusLbl.innerText = "A conectar...";
+            conn = peer.connect(remoteId);
+            setupHandler();
+        }
+
+        peer.on('connection', c => {
+            conn = c;
+            setupHandler();
+        });
+
+        function setupHandler() {
+            conn.on('open', () => {
+                document.getElementById('transfer-card').style.display = 'block';
+                document.getElementById('conn-card').style.display = 'none';
+                statusLbl.innerText = "Conectado!";
+            });
+
+            let incomingChunks = [];
+            let currentMeta = null;
+
+            conn.on('data', data => {
+                if (data.type === 'START') {
+                    incomingChunks = [];
+                    currentMeta = data;
+                    pCont.style.display = 'block';
+                    return;
+                }
+                if (data.type === 'PROGRESS') {
+                    pBar.style.width = data.percent + '%';
+                    statusLbl.innerHTML = `Recebendo: ${currentMeta.name}<br>${data.percent}% - ${data.speed} MB/s`;
+                    return;
+                }
+                if (data.type === 'END') {
+                    const blob = new Blob(incomingChunks, { type: currentMeta.fileType });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = currentMeta.name;
+                    a.click();
+                    statusLbl.innerText = "✅ Recebido: " + currentMeta.name;
+                    pCont.style.display = 'none';
+                    return;
+                }
+                if (data instanceof ArrayBuffer || data instanceof Uint8Array) {
+                    incomingChunks.push(data);
+                }
+            });
+        }
+
+        document.getElementById('file-input').onchange = e => {
+            selectedFiles = Array.from(e.target.files);
+            document.getElementById('btn-send').style.display = "block";
+            document.getElementById('file-list').innerHTML = selectedFiles.map(f => `<div>• ${f.name}</div>`).join('');
+        };
+
+        async function sendAllFiles() {
+            pCont.style.display = 'block';
+            for (let file of selectedFiles) {
+                const buffer = await file.arrayBuffer();
+                conn.send({ type: 'START', name: file.name, fileType: file.type });
+
+                let startTime = Date.now();
+                let sentBytes = 0;
+
+                for (let offset = 0; offset < buffer.byteLength; offset += CHUNK_SIZE) {
+                    const chunk = buffer.slice(offset, offset + CHUNK_SIZE);
+                    conn.send(chunk);
+                    sentBytes += chunk.byteLength;
+
+                    if (offset % (CHUNK_SIZE * 10) === 0 || offset + CHUNK_SIZE >= buffer.byteLength) {
+                        const now = Date.now();
+                        const sec = (now - startTime) / 1000;
+                        const speed = sec > 0 ? (sentBytes / (1024 * 1024) / sec).toFixed(2) : 0;
+                        const percent = Math.round((offset / buffer.byteLength) * 100);
+                        
+                        pBar.style.width = percent + '%';
+                        statusLbl.innerHTML = `Enviando: ${file.name}<br>${percent}% - ${speed} MB/s`;
+                        conn.send({ type: 'PROGRESS', percent, speed });
+                        await new Promise(r => setTimeout(r, 1)); 
+                    }
+                }
+                conn.send({ type: 'END' });
+            }
+            statusLbl.innerText = "✅ Tudo enviado!";
+            pCont.style.display = 'none';
+        }
+
+        document.getElementById('btn-scan').onclick = () => {
+            const r = document.getElementById('reader');
+            r.style.display = 'block';
+            const scanner = new Html5Qrcode("reader");
+            scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, d => {
+                const u = new URL(d);
+                if (u.searchParams.has('peer')) {
+                    connectTo(u.searchParams.get('peer'));
+                    scanner.stop();
+                    r.style.display = 'none';
+                }
+            });
+        };
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    </script>
+</body>
+</html>
