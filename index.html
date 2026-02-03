@@ -3,183 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PrivDrop Lab - Teste de Performance</title>
+    <title>PrivDrop Lab Ultra - Nitro Edition</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        :root { --blue: #007aff; --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --green: #34c759; --border: #dddddd; --red: #ff3b30; }
+        :root { 
+            --blue: #007aff; --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; 
+            --green: #34c759; --border: #dddddd; --red: #ff3b30; --tg: #0088cc; 
+            --nitro-1: #8A2BE2; --nitro-2: #FF00FF; /* Cores do Gradiente */
+        }
         @media (prefers-color-scheme: dark) { :root { --bg: #000; --card: #1c1c1e; --text: #fff; --border: #38383a; } }
         
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; color: var(--text); transition: 0.3s; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; color: var(--text); }
+        .card { background: var(--card); padding: 20px; border-radius: 24px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.1); text-align: center; margin-bottom: 15px; box-sizing: border-box; }
         
-        .card { background: var(--card); padding: 25px; border-radius: 28px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); text-align: center; margin-bottom: 20px; box-sizing: border-box; }
-        .my-id { font-size: 38px; font-weight: 800; color: var(--blue); letter-spacing: 4px; margin: 10px 0; }
+        .section-title { font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; margin: 15px 0 8px; display: block; text-align: left; letter-spacing: 1px; }
         
-        /* Menu de Velocidade */
-        .config-title { font-size: 11px; font-weight: 800; color: #888; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .chunk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
-        .btn-chunk { background: var(--bg); border: 2px solid var(--border); color: var(--text); padding: 8px; border-radius: 12px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-chunk.active { background: var(--blue); color: white; border-color: var(--blue); }
-        .btn-full { grid-column: span 3; background: #5856d6; color: white; border: none; padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        .btn-full.active { background: var(--red); box-shadow: 0 0 15px rgba(255, 59, 48, 0.4); }
-
+        /* Botões Sociais */
         .btn-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
         .btn-sec { padding: 12px 5px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; color: white; font-size: 10px; text-transform: uppercase; }
+
+        /* Grades de Opções */
+        .grid-opt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+        .btn-opt { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 2px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-opt.active { background: var(--blue); color: white; border-color: var(--blue); }
         
-        .drop-zone { border: 2px dashed var(--border); border-radius: 20px; padding: 30px; cursor: pointer; background: rgba(128,128,128,0.05); }
-        .btn-primary { background: var(--blue); color: white; border: none; padding: 20px; border-radius: 18px; font-size: 16px; font-weight: 800; width: 100%; cursor: pointer; }
-        
-        #progress-container { display: none; margin-top: 20px; width: 100%; }
-        .progress-track { background: var(--border); height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0; }
-        #progress-bar { background: var(--blue); width: 0%; height: 100%; transition: width 0.8s ease-out; }
+        /* ESTILO DO BOTÃO NITRO (Igual à referência) */
+        .btn-nitro { 
+            grid-column: span 3; 
+            background: linear-gradient(90deg, var(--nitro-1), var(--nitro-2)); 
+            color: white; 
+            border: none; 
+            padding: 16px; 
+            border-radius: 12px; 
+            font-weight: 900; 
+            cursor: pointer; 
+            margin-top: 8px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+            transition: transform 0.2s;
+        }
+        .btn-nitro:active { transform: scale(0.98); }
+        .btn-nitro.active { 
+            border: 3px solid white; 
+            box-shadow: 0 0 20px var(--nitro-2);
+            position: relative;
+        }
+        .btn-nitro.active::after { content: " (ATIVADO)"; font-size: 10px; }
+
+        /* Botões de Ação */
+        .btn-main { border: none; padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; font-size: 14px; color: white; text-transform: uppercase; }
+        #send-btn { background: var(--green); }
+        #stop-btn { background: var(--red); display: none; }
+
+        /* Barra de Progresso & Animação de Loop */
+        .progress-track { background: var(--border); height: 14px; border-radius: 7px; overflow: hidden; margin: 10px 0; position: relative; }
+        #progress-bar { background: var(--blue); width: 0%; height: 100%; transition: width 0.4s ease-out; }
+
+        /* Animação do Modo Loop (Nitro) */
+        @keyframes loop-anim { 
+            0% { background-position: 0 0; } 
+            100% { background-position: 30px 30px; } 
+        }
+        .loop-bar {
+            width: 100% !important;
+            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
+            background-size: 30px 30px;
+            background-color: var(--nitro-1);
+            animation: loop-anim 1s linear infinite;
+        }
+
+        #reader { width: 100%; border-radius: 20px; overflow: hidden; display: none; margin-bottom: 15px; border: 2px solid var(--blue); background: #000; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <span class="config-title">Teu ID Privado</span>
-        <div id="my-id-display" class="my-id">----</div>
-        <div id="qrcode" style="display: flex; justify-content: center; margin-bottom: 15px;"></div>
+        <div id="my-id-display" style="font-size: 32px; font-weight: 900; color: var(--blue);">----</div>
+        <div id="qrcode" style="display: flex; justify-content: center; margin: 10px 0;"></div>
+        
         <div class="btn-row">
-            <button class="btn-sec" style="background:var(--green)" onclick="shareWpp()">Wpp</button>
-            <button class="btn-sec" style="background:var(--blue)" onclick="shareTg()">Telegram</button>
+            <button class="btn-sec" style="background:var(--green)" onclick="shareWpp()">WhatsApp</button>
+            <button class="btn-sec" style="background:var(--tg)" onclick="shareTg()">Telegram</button>
             <button class="btn-sec" style="background:#3a3a3c" onclick="toggleScanner()">Câmera</button>
         </div>
     </div>
 
-    <div class="card" id="config-card">
-        <span class="config-title">Configurações de Transmissão</span>
-        <div class="chunk-grid">
-            <button class="btn-chunk" onclick="setMode(65536, this)">64KB</button>
-            <button class="btn-chunk" onclick="setMode(131072, this)">128KB</button>
-            <button class="btn-chunk active" onclick="setMode(262144, this)">256KB</button>
-            <button class="btn-chunk" onclick="setMode(524288, this)">512KB</button>
-            <button class="btn-chunk" onclick="setMode(1048576, this)">1024KB</button>
-            <button class="btn-full" id="btn-full" onclick="setMode('FULL', this)">ITEM INTEIRO (SEM LIMITES)</button>
-        </div>
-        <div id="status-msg" style="font-size: 12px; color: var(--blue); font-weight: bold;">Modo: Fatiado (256KB)</div>
-    </div>
-
     <div id="reader"></div>
 
-    <div class="card" id="transfer-card" style="display:none;">
-        <div class="drop-zone" onclick="document.getElementById('file-input').click()">
-            <span style="font-size: 40px;">📂</span>
-            <p id="drop-label" style="font-weight: 800;">Selecionar Arquivos</p>
-            <input type="file" id="file-input" multiple style="display: none;">
+    <div class="card">
+        <span class="section-title">Ajuste do Motor (Chunks)</span>
+        <div class="grid-opt">
+            <button class="btn-opt" onclick="setChunk(65536, this)">64KB</button>
+            <button class="btn-opt" onclick="setChunk(131072, this)">128KB</button>
+            <button class="btn-opt active" onclick="setChunk(262144, this)">256KB</button>
+            <button class="btn-opt" onclick="setChunk(524288, this)">512KB</button>
+            <button class="btn-opt" onclick="setChunk(1048576, this)">1024KB</button>
+            <button class="btn-opt" onclick="setChunk(2097152, this)">2048KB</button>
         </div>
         
-        <div id="progress-container">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; font-size: 12px; font-weight: bold; color: #888;">
-                <span id="percent-label">0%</span>
-                <span id="speed-label" style="text-align: right;">0 MB/s</span>
+        <button class="btn-nitro" id="nitro-btn" onclick="setNitro(this)">Modo Item Inteiro (Nitro)</button>
+
+        <span class="section-title" style="margin-top: 20px;">Delay da Interface (ms)</span>
+        <div class="grid-opt">
+            <button class="btn-opt" onclick="setMs(100, this)">100ms</button>
+            <button class="btn-opt" onclick="setMs(500, this)">500ms</button>
+            <button class="btn-opt active" onclick="setMs(1500, this)">1500ms</button>
+            <button class="btn-opt" onclick="setMs(3000, this)">3s</button>
+            <button class="btn-opt" onclick="setMs(5000, this)">5s</button>
+            <button class="btn-opt" onclick="setMs(10000, this)">10s</button>
+        </div>
+    </div>
+
+    <div class="card" id="transfer-area" style="display:none;">
+        <input type="file" id="file-input" multiple style="width: 100%; margin-bottom: 15px;">
+        <div id="progress-container" style="display:none;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom:5px;">
+                <span id="pct">0%</span>
+                <span id="speed">AGUARDANDO...</span>
             </div>
             <div class="progress-track"><div id="progress-bar"></div></div>
-            <div id="eta-label" style="text-align: center; font-size: 12px; color: var(--blue);"></div>
+            <div id="status-text" style="font-size: 11px; opacity: 0.6; margin-top:5px;">Pronto</div>
         </div>
-
-        <button class="btn-primary" style="background:var(--green); display:none; margin-top:15px;" id="send-trigger" onclick="sendAllFiles()">Iniciar Teste</button>
+        <button id="send-btn" class="btn-main" onclick="sendAll()">Enviar Tudo</button>
+        <button id="stop-btn" class="btn-main" onclick="cancelTransfer()">🛑 Parar Envio</button>
     </div>
 
     <script>
-        let peer, conn, selectedFiles = [], currentChunk = 262144, isFullMode = false;
-        let receivedChunks = {};
+        let peer, conn, chunkVal = 262144, msVal = 1500, nitro = false, isCancelled = false, html5QrCode;
+        let received = {};
 
         peer = new Peer(Math.floor(1000 + Math.random() * 9000).toString());
         peer.on('open', id => {
             document.getElementById('my-id-display').innerText = id;
-            new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?join=${id}`, width: 120, height: 120 });
+            new QRCode(document.getElementById("qrcode"), { text: window.location.href + "?join=" + id, width: 120, height: 120 });
             const join = new URLSearchParams(window.location.search).get('join');
-            if (join) { 
-                document.getElementById('transfer-card').style.display = 'block';
-                setTimeout(() => { conn = peer.connect(join); setupHandler(); }, 1000); 
-            }
+            if(join) connect(join);
         });
+        peer.on('connection', c => { conn = c; setupConn(); });
 
-        peer.on('connection', c => { conn = c; setupHandler(); document.getElementById('transfer-card').style.display = 'block'; });
+        function connect(id) { conn = peer.connect(id); setupConn(); }
 
-        function setMode(val, btn) {
-            document.querySelectorAll('.btn-chunk, .btn-full').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if (val === 'FULL') {
-                isFullMode = true;
-                document.getElementById('status-msg').innerText = "Modo: ITEM INTEIRO (Atenção: Pode crashar arquivos grandes)";
-            } else {
-                isFullMode = false;
-                currentChunk = val;
-                document.getElementById('status-msg').innerText = `Modo: Fatiado (${val/1024}KB)`;
-            }
-        }
-
-        function setupHandler() {
+        function setupConn() {
+            document.getElementById('transfer-area').style.display = 'block';
             conn.on('data', d => {
-                if (d.fullFile) { // Recebimento de item inteiro
-                    const b = new Blob([d.fullFile], { type: d.type });
-                    download(b, d.name);
-                } else if (d.file) { // Recebimento fatiado
-                    if (!receivedChunks[d.name]) receivedChunks[d.name] = [];
-                    receivedChunks[d.name].push(d.file);
-                    if (d.isFinal) {
-                        const b = new Blob(receivedChunks[d.name], { type: d.type });
-                        download(b, d.name);
-                        delete receivedChunks[d.name];
-                    }
+                if(d.full) { 
+                    save(new Blob([d.full], {type:d.type}), d.name); 
+                } else if(d.file) {
+                    if(!received[d.name]) received[d.name] = [];
+                    received[d.name].push(d.file);
+                    if(d.last) { save(new Blob(received[d.name], {type:d.type}), d.name); delete received[d.name]; }
                 }
             });
         }
 
-        function download(blob, name) {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob); a.download = name; a.click();
+        function save(b, n) { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click(); }
+
+        // Configurações
+        function setChunk(v, b) { 
+            chunkVal = v; 
+            nitro = false; 
+            reset('.grid-opt .btn-opt', b); 
+            document.getElementById('nitro-btn').classList.remove('active'); 
+        }
+        function setMs(v, b) { msVal = v; reset('.grid-opt .btn-opt', b); }
+        
+        function setNitro(b) { 
+            nitro = !nitro; 
+            b.classList.toggle('active');
+            // Remove seleção dos chunks se nitro ativar
+            if(nitro) document.querySelectorAll('.grid-opt .btn-opt').forEach(x => x.classList.remove('active'));
+            // Se desativar nitro, volta pro padrão 256KB visualmente
+            else document.querySelectorAll('.grid-opt .btn-opt')[2].classList.add('active');
         }
 
-        document.getElementById('file-input').onchange = e => {
-            selectedFiles = Array.from(e.target.files);
-            document.getElementById('send-trigger').style.display = 'block';
-            document.getElementById('drop-label').innerText = selectedFiles.length + " Selecionados";
-        };
+        function reset(s, b) { document.querySelectorAll(s).forEach(x => x.classList.remove('active')); b.classList.add('active'); }
 
         async function sendFile(f) {
-            document.getElementById('progress-container').style.display = 'block';
+            isCancelled = false;
+            const pContainer = document.getElementById('progress-container');
+            const pBar = document.getElementById('progress-bar');
+            const pText = document.getElementById('pct');
+            const spdText = document.getElementById('speed');
             
-            if (isFullMode) {
-                // MODO ITEM INTEIRO
-                document.getElementById('eta-label').innerText = "Enviando arquivo completo... aguarde.";
-                conn.send({ fullFile: f, name: f.name, type: f.type });
-                document.getElementById('progress-bar').style.width = '100%';
-                document.getElementById('percent-label').innerText = '100%';
+            pContainer.style.display = 'block';
+            document.getElementById('send-btn').style.display = 'none';
+            document.getElementById('stop-btn').style.display = 'block';
+
+            if(nitro) {
+                // MODO LOOP VISUAL
+                pBar.className = 'loop-bar'; // Ativa a animação listrada
+                pText.innerText = "NITRO";
+                spdText.innerText = "ENVIANDO BLOCO ÚNICO...";
+                document.getElementById('status-text').innerText = "O navegador pode congelar brevemente...";
+                
+                // Pequeno delay para a UI atualizar antes de travar no envio
+                await new Promise(r => setTimeout(r, 100));
+                
+                conn.send({ full: f, name: f.name, type: f.type });
+                
+                // Finalização imediata visual (pois não temos chunks)
+                pBar.className = ''; 
+                pBar.style.width = '100%';
+                pBar.style.backgroundColor = '#34c759';
+                spdText.innerText = "ENVIADO!";
+                
             } else {
-                // MODO FATIADO (Benchmarking)
-                let offset = 0; let start = Date.now(); let last = 0;
-                while (offset < f.size) {
-                    const chunk = f.slice(offset, offset + currentChunk);
-                    conn.send({ file: await chunk.arrayBuffer(), name: f.name, type: f.type, size: f.size, isFinal: (offset + currentChunk >= f.size) });
-                    offset += currentChunk;
-                    const now = Date.now();
-                    if (now - last > 1500 || offset >= f.size) {
-                        const bps = offset / ((now - start) / 1000);
-                        const pct = Math.min(100, Math.round((offset/f.size)*100));
-                        document.getElementById('progress-bar').style.width = pct + '%';
-                        document.getElementById('percent-label').innerText = pct + '%';
-                        document.getElementById('speed-label').innerText = (bps/(1024*1024)).toFixed(1) + " MB/s";
-                        document.getElementById('eta-label').innerText = `Restam ~${Math.round((f.size-offset)/bps)}s`;
-                        last = now;
+                // MODO CHUNK PADRÃO
+                pBar.className = ''; // Remove loop
+                pBar.style.backgroundColor = 'var(--blue)';
+                
+                let offset = 0, start = Date.now(), lastUp = 0;
+                while(offset < f.size) {
+                    if(isCancelled) break;
+                    const chk = f.slice(offset, offset + chunkVal);
+                    conn.send({ file: await chk.arrayBuffer(), name: f.name, type: f.type, size: f.size, last: (offset + chunkVal >= f.size) });
+                    offset += chunkVal;
+                    
+                    let now = Date.now();
+                    if(now - lastUp > msVal || offset >= f.size) {
+                        let bps = offset / ((now - start) / 1000);
+                        let pct = Math.round((offset/f.size)*100);
+                        pBar.style.width = pct + '%';
+                        pText.innerText = pct + '%';
+                        spdText.innerText = (bps/1024/1024).toFixed(1) + " MB/s";
+                        document.getElementById('status-text').innerText = `Enviando partes de ${chunkVal/1024}KB`;
+                        lastUp = now;
                     }
                 }
             }
+            resetUI();
         }
 
-        async function sendAllFiles() {
-            for (let f of selectedFiles) await sendFile(f);
-            document.getElementById('status-msg').innerText = "✅ Teste Concluído!";
+        function cancelTransfer() { isCancelled = true; }
+        function resetUI() { 
+            document.getElementById('send-btn').style.display = 'block'; 
+            document.getElementById('stop-btn').style.display = 'none';
+            // Reseta a barra visualmente se foi cancelado
+            if(isCancelled) {
+                document.getElementById('progress-bar').style.width = '0%';
+                document.getElementById('progress-bar').className = '';
+                document.getElementById('speed').innerText = "CANCELADO";
+            }
+        }
+
+        async function sendAll() {
+            const files = document.getElementById('file-input').files;
+            for(let f of files) { if(isCancelled) break; await sendFile(f); }
         }
 
         function shareWpp() { window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(window.location.href+"?join="+document.getElementById('my-id-display').innerText)}`); }
-        function shareTg() { window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href+"?join="+document.getElementById('my-id-display').innerText)}&text=PrivDrop`); }
-        function toggleScanner() { /* Lógica de câmera simplificada para o teste */ alert("Use o ID ou Link para o teste rápido."); }
+        function shareTg() { window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href+"?join="+document.getElementById('my-id-display').innerText)}&text=PrivDrop Lab`); }
+        function toggleScanner() {
+            const r = document.getElementById('reader');
+            if (r.style.display === 'block') { html5QrCode.stop(); r.style.display = 'none'; return; }
+            r.style.display = 'block';
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+                const url = new URL(text);
+                const id = url.searchParams.get("join");
+                html5QrCode.stop().then(() => { r.style.display = 'none'; connect(id); });
+            }).catch(() => {});
+        }
     </script>
 </body>
 </html>
