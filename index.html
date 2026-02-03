@@ -3,209 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PrivDrop Ultra - High Speed</title>
+    <title>PrivDrop Simple</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007aff">
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
 
     <style>
-        :root { --blue: #007aff; --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; --green: #34c759; --border: #dddddd; }
-        @media (prefers-color-scheme: dark) { :root { --bg: #000; --card: #1c1c1e; --text: #fff; --border: #38383a; } }
+        :root { --blue: #007aff; --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #000; --card: #1c1c1e; --text: #fff; } }
         
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; color: var(--text); transition: 0.3s; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; color: var(--text); }
         
         .card { background: var(--card); padding: 25px; border-radius: 28px; width: 100%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); text-align: center; margin-bottom: 20px; box-sizing: border-box; }
         .my-id { font-size: 38px; font-weight: 800; color: var(--blue); letter-spacing: 4px; }
         
-        #qrcode { display: flex; justify-content: center; margin: 15px auto; background: white; padding: 10px; border-radius: 15px; width: fit-content; }
-        
-        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .btn-sec { padding: 12px; border-radius: 14px; border: none; font-weight: 600; cursor: pointer; color: white; }
-        .btn-wpp { background: #25d366; } .btn-scan { background: #3a3a3c; }
+        /* Spinner de Carregamento */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #reader { width: 100%; border-radius: 20px; overflow: hidden; display: none; margin-bottom: 20px; border: 2px solid var(--blue); }
+        .btn-primary { background: var(--blue); color: white; border: none; padding: 20px; border-radius: 18px; font-size: 16px; font-weight: 800; width: 100%; cursor: pointer; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .drop-zone { border: 2px dashed var(--border); border-radius: 20px; padding: 40px 20px; cursor: pointer; background: rgba(128,128,128,0.05); margin-bottom: 15px; }
-        .btn-primary { background: var(--blue); color: white; border: none; padding: 18px; border-radius: 16px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; }
-
-        #progress-container { display: none; margin-top: 20px; width: 100%; padding: 15px; background: rgba(128,128,128,0.05); border-radius: 15px; }
-        .progress-track { background: var(--border); height: 10px; border-radius: 5px; overflow: hidden; margin: 10px 0; }
-        
-        /* O segredo da suavidade está no transition aqui */
-        #progress-bar { background: var(--blue); width: 0%; height: 100%; transition: width 0.8s ease-out; }
-        
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; font-size: 12px; font-weight: bold; color: #888; }
-        .eta { grid-column: span 2; color: var(--blue); margin-top: 5px; font-size: 13px; text-align: center; }
-
-        #status-msg { margin-top: 15px; font-size: 14px; color: var(--blue); font-weight: 700; }
+        #status-msg { margin-top: 15px; font-size: 15px; font-weight: 700; color: var(--blue); }
+        .warning-box { background: rgba(255, 149, 0, 0.1); color: #ff9500; padding: 15px; border-radius: 15px; font-size: 13px; margin-top: 15px; display: none; text-align: left; border: 1px solid #ff9500; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <span style="color: #8e8e93; font-size: 11px; font-weight: bold; text-transform: uppercase;">ID do Dispositivo</span>
+        <span style="color: #8e8e93; font-size: 12px; font-weight: 800; text-transform: uppercase;">Seu ID</span>
         <div id="my-id-display" class="my-id">----</div>
-        <div id="qrcode"></div>
-        <div class="btn-row">
-            <button class="btn-sec btn-wpp" onclick="shareWhatsApp()">WhatsApp</button>
-            <button class="btn-sec btn-scan" onclick="toggleScanner()">Câmera</button>
-        </div>
+        <div id="qrcode" style="display:flex; justify-content:center; margin: 15px 0;"></div>
     </div>
 
-    <div id="reader"></div>
-
     <div class="card" id="setup-card">
-        <input type="text" id="peer-id-input" placeholder="ID do destinatário" style="width:100%; padding:15px; border-radius:15px; border:1px solid var(--border); background: var(--bg); color: var(--text); text-align:center; margin-bottom:12px; font-size: 18px;">
+        <input type="text" id="peer-id-input" placeholder="ID do amigo" style="width:100%; padding:18px; border-radius:18px; border:1px solid #ddd; text-align:center; margin-bottom:15px; font-size: 20px;">
         <button class="btn-primary" onclick="connectToPeer()">Conectar</button>
-        <div id="status-msg">Pronto para conectar</div>
+        <div id="status-msg">Aguardando Conexão...</div>
     </div>
 
     <div class="card" id="transfer-card" style="display:none;">
-        <div class="drop-zone" onclick="document.getElementById('file-input').click()">
-            <span style="font-size: 50px;">📂</span>
-            <p id="drop-label">Toque para selecionar arquivos</p>
-            <input type="file" id="file-input" multiple style="display: none;">
-        </div>
+        <input type="file" id="file-input" multiple style="margin-bottom: 20px;">
         
-        <div id="progress-container">
-            <div class="stats-grid">
-                <span id="percent-label">0%</span>
-                <span id="speed-label" style="text-align: right;">0 MB/s</span>
-                <div class="eta" id="eta-label">Calculando...</div>
-            </div>
-            <div class="progress-track"><div id="progress-bar"></div></div>
-            <div id="file-list" style="font-size:11px; text-align:left; opacity:0.6;"></div>
+        <div id="loader" class="loader"></div>
+        
+        <div id="warning" class="warning-box">
+            <strong>Atenção:</strong> O arquivo está sendo enviado inteiro. <br><br>
+            A tela pode parecer travada por alguns instantes enquanto o navegador processa os dados. 
+            <strong>Não feche esta aba</strong> até que a mensagem de sucesso apareça.
         </div>
 
-        <button class="btn-primary" style="background:var(--green); display:none; margin-top:15px;" id="send-trigger" onclick="sendAllFiles()">Enviar Tudo</button>
+        <button class="btn-primary" id="send-btn" onclick="sendEntireFile()">Enviar Arquivo Inteiro</button>
     </div>
 
     <script>
-        let peer, conn, selectedFiles = [], html5QrCode, receivedChunks = {};
+        let peer, conn;
         const statusLbl = document.getElementById('status-msg');
-
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
         peer = new Peer(Math.floor(1000 + Math.random() * 9000).toString());
         
         peer.on('open', id => {
             document.getElementById('my-id-display').innerText = id;
-            const link = `${window.location.origin}${window.location.pathname}?join=${id}`;
-            new QRCode(document.getElementById("qrcode"), { text: link, width: 140, height: 140 });
+            new QRCode(document.getElementById("qrcode"), { 
+                text: `${window.location.origin}${window.location.pathname}?join=${id}`, 
+                width: 140, height: 140 
+            });
         });
 
         function connectToPeer() {
             const target = document.getElementById('peer-id-input').value;
-            if (!target) return;
-            statusLbl.innerText = "Conectando...";
-            conn = peer.connect(target, { reliable: true });
-            conn.on('open', () => setupTransferMode("Conectado!"));
+            conn = peer.connect(target);
+            conn.on('open', () => {
+                document.getElementById('transfer-card').style.display = 'block';
+                document.getElementById('setup-card').style.display = 'none';
+                statusLbl.innerText = "Conectado!";
+            });
             setupHandler();
         }
 
-        peer.on('connection', c => { conn = c; setupHandler(); setupTransferMode("Conectado!"); });
-
-        function setupTransferMode(m) {
+        peer.on('connection', c => {
+            conn = c;
+            setupHandler();
             document.getElementById('transfer-card').style.display = 'block';
             document.getElementById('setup-card').style.display = 'none';
-            statusLbl.innerText = m;
-        }
+            statusLbl.innerText = "Conectado!";
+        });
 
         function setupHandler() {
             conn.on('data', data => {
-                if (data.file) {
-                    if (!receivedChunks[data.name]) receivedChunks[data.name] = [];
-                    receivedChunks[data.name].push(data.file);
-                    const receivedSize = receivedChunks[data.name].length * 65536;
-                    const percent = Math.min(100, Math.round((receivedSize / data.size) * 100));
-                    statusLbl.innerText = `Recebendo: ${percent}%`;
-                    if (data.isFinal) {
-                        const b = new Blob(receivedChunks[data.name], { type: data.type });
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(b); a.download = data.name; a.click();
-                        delete receivedChunks[data.name];
-                        statusLbl.innerText = "✅ Recebido!";
-                    }
-                }
+                const blob = new Blob([data.file], { type: data.type });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = data.name;
+                a.click();
+                statusLbl.innerText = "✅ Recebido: " + data.name;
             });
         }
 
-        document.getElementById('file-input').onchange = e => {
-            selectedFiles = Array.from(e.target.files);
-            document.getElementById('file-list').innerHTML = selectedFiles.map(f => `<div>📄 ${f.name}</div>`).join('');
-            document.getElementById('send-trigger').style.display = 'block';
-            document.getElementById('drop-label').innerText = selectedFiles.length + " prontos";
-        };
+        function sendEntireFile() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            if (!file || !conn) return;
 
-        async function sendFile(file) {
-            const CHUNK_SIZE = 65536; 
-            const totalSize = file.size;
-            let offset = 0;
-            let startTime = Date.now();
-            let lastUpdate = 0;
+            // Interface de espera
+            document.getElementById('send-btn').disabled = true;
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('warning').style.display = 'block';
+            statusLbl.innerText = "Enviando blocos... aguarde.";
 
-            document.getElementById('progress-container').style.display = 'block';
+            // O envio inteiro é assíncrono, mas trava a UI se o arquivo for gigante
+            conn.send({
+                file: file,
+                name: file.name,
+                type: file.type
+            });
 
-            while (offset < totalSize) {
-                const chunk = file.slice(offset, offset + CHUNK_SIZE);
-                const buffer = await chunk.arrayBuffer();
-                
-                conn.send({ 
-                    file: buffer, 
-                    name: file.name, 
-                    type: file.type, 
-                    size: totalSize, 
-                    isFinal: (offset + CHUNK_SIZE >= totalSize) 
-                });
-                
-                offset += CHUNK_SIZE;
-
-                const now = Date.now();
-                // ATUALIZAÇÃO TESTE: 1500ms (1.5 segundos)
-                if (now - lastUpdate > 1500 || offset >= totalSize) {
-                    const duration = (now - startTime) / 1000;
-                    const bps = offset / duration;
-                    const percent = Math.min(100, Math.round((offset / totalSize) * 100));
-                    const speedMB = (bps / 1024 / 1024).toFixed(1);
-                    const eta = Math.round((totalSize - offset) / bps);
-
-                    document.getElementById('progress-bar').style.width = percent + '%';
-                    document.getElementById('percent-label').innerText = percent + '%';
-                    document.getElementById('speed-label').innerText = speedMB + " MB/s";
-                    document.getElementById('eta-label').innerText = percent < 100 ? `Tempo restante: ~${eta}s` : "Finalizado!";
-                    
-                    lastUpdate = now;
-                }
-            }
-        }
-
-        async function sendAllFiles() {
-            document.getElementById('send-trigger').disabled = true;
-            for (let file of selectedFiles) { await sendFile(file); }
-            statusLbl.innerText = "✅ Tudo enviado!";
-            document.getElementById('send-trigger').disabled = false;
-        }
-
-        function shareWhatsApp() {
-            const id = document.getElementById('my-id-display').innerText;
-            const link = `${window.location.origin}${window.location.pathname}?join=${id}`;
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent("Envie arquivos: " + link)}`);
-        }
-        
-        function toggleScanner() {
-            const r = document.getElementById('reader');
-            if (r.style.display === 'block') { html5QrCode.stop(); r.style.display = 'none'; return; }
-            r.style.display = 'block';
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-                const url = new URL(text);
-                document.getElementById('peer-id-input').value = url.searchParams.get("join");
-                html5QrCode.stop().then(() => { r.style.display = 'none'; connectToPeer(); });
-            }).catch(() => {});
+            // Como não temos progresso real, simulamos o fim baseado na conexão
+            // O PeerJS não avisa exatamente quando o buffer esvaziou no modo simples
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('warning').style.display = 'none';
+                document.getElementById('send-btn').disabled = false;
+                statusLbl.innerText = "✅ Comando de envio disparado!";
+            }, 2000);
         }
     </script>
 </body>
