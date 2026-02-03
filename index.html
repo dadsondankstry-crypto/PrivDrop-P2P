@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PrivDrop Lab Ultra - Nitro Edition</title>
+    <title>PrivDrop Lab Ultra - Edição Final</title>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -13,7 +13,7 @@
         :root { 
             --blue: #007aff; --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; 
             --green: #34c759; --border: #dddddd; --red: #ff3b30; --tg: #0088cc; 
-            --nitro-1: #8A2BE2; --nitro-2: #FF00FF; /* Cores do Gradiente */
+            --nitro-1: #8A2BE2; --nitro-2: #FF00FF;
         }
         @media (prefers-color-scheme: dark) { :root { --bg: #000; --card: #1c1c1e; --text: #fff; --border: #38383a; } }
         
@@ -22,60 +22,35 @@
         
         .section-title { font-size: 10px; font-weight: 800; color: #888; text-transform: uppercase; margin: 15px 0 8px; display: block; text-align: left; letter-spacing: 1px; }
         
-        /* Botões Sociais */
-        .btn-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 15px; }
+        /* Conexão Rápida */
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
         .btn-sec { padding: 12px 5px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; color: white; font-size: 10px; text-transform: uppercase; }
 
-        /* Grades de Opções */
-        .grid-opt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
-        .btn-opt { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 2px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-opt.active { background: var(--blue); color: white; border-color: var(--blue); }
+        /* Grades de Motor */
+        .grid-opt { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .btn-opt { background: var(--bg); border: 2px solid var(--border); color: var(--text); padding: 12px 2px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-opt.active { background: var(--blue); color: white; border-color: var(--blue); transform: scale(1.05); }
         
-        /* ESTILO DO BOTÃO NITRO (Igual à referência) */
+        /* Botão Nitro Gradiente */
         .btn-nitro { 
             grid-column: span 3; 
             background: linear-gradient(90deg, var(--nitro-1), var(--nitro-2)); 
-            color: white; 
-            border: none; 
-            padding: 16px; 
-            border-radius: 12px; 
-            font-weight: 900; 
-            cursor: pointer; 
-            margin-top: 8px; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 900; 
+            cursor: pointer; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
-            transition: transform 0.2s;
         }
-        .btn-nitro:active { transform: scale(0.98); }
-        .btn-nitro.active { 
-            border: 3px solid white; 
-            box-shadow: 0 0 20px var(--nitro-2);
-            position: relative;
-        }
-        .btn-nitro.active::after { content: " (ATIVADO)"; font-size: 10px; }
+        .btn-nitro.active { outline: 3px solid white; box-shadow: 0 0 20px var(--nitro-2); }
 
-        /* Botões de Ação */
-        .btn-main { border: none; padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; font-size: 14px; color: white; text-transform: uppercase; }
+        /* Ações Principais */
+        .btn-main { border: none; padding: 18px; border-radius: 18px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; font-size: 14px; color: white; text-transform: uppercase; }
         #send-btn { background: var(--green); }
         #stop-btn { background: var(--red); display: none; }
 
-        /* Barra de Progresso & Animação de Loop */
-        .progress-track { background: var(--border); height: 14px; border-radius: 7px; overflow: hidden; margin: 10px 0; position: relative; }
-        #progress-bar { background: var(--blue); width: 0%; height: 100%; transition: width 0.4s ease-out; }
-
-        /* Animação do Modo Loop (Nitro) */
-        @keyframes loop-anim { 
-            0% { background-position: 0 0; } 
-            100% { background-position: 30px 30px; } 
-        }
-        .loop-bar {
-            width: 100% !important;
-            background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
-            background-size: 30px 30px;
-            background-color: var(--nitro-1);
-            animation: loop-anim 1s linear infinite;
-        }
+        /* Barra de Progresso e Loop */
+        .progress-track { background: var(--border); height: 16px; border-radius: 8px; overflow: hidden; margin: 15px 0; }
+        #progress-bar { background: var(--blue); width: 0%; height: 100%; transition: width 0.3s ease-out; }
+        @keyframes loop-anim { 0% { background-position: 0 0; } 100% { background-position: 30px 30px; } }
+        .loop-bar { width: 100% !important; background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent); background-size: 30px 30px; background-color: var(--nitro-1); animation: loop-anim 1s linear infinite; }
 
         #reader { width: 100%; border-radius: 20px; overflow: hidden; display: none; margin-bottom: 15px; border: 2px solid var(--blue); background: #000; }
     </style>
@@ -96,7 +71,7 @@
     <div id="reader"></div>
 
     <div class="card">
-        <span class="section-title">Ajuste do Motor (Chunks)</span>
+        <span class="section-title">🚀 Marchas (Chunk Size)</span>
         <div class="grid-opt">
             <button class="btn-opt" onclick="setChunk(65536, this)">64KB</button>
             <button class="btn-opt" onclick="setChunk(131072, this)">128KB</button>
@@ -105,14 +80,13 @@
             <button class="btn-opt" onclick="setChunk(1048576, this)">1024KB</button>
             <button class="btn-opt" onclick="setChunk(2097152, this)">2048KB</button>
         </div>
-        
         <button class="btn-nitro" id="nitro-btn" onclick="setNitro(this)">Modo Item Inteiro (Nitro)</button>
 
-        <span class="section-title" style="margin-top: 20px;">Delay da Interface (ms)</span>
+        <span class="section-title" style="margin-top: 20px;">⏱️ Pulso (Update Delay)</span>
         <div class="grid-opt">
             <button class="btn-opt" onclick="setMs(100, this)">100ms</button>
             <button class="btn-opt" onclick="setMs(500, this)">500ms</button>
-            <button class="btn-opt active" onclick="setMs(1500, this)">1500ms</button>
+            <button class="btn-opt active" onclick="setMs(1500, this)">1.5s</button>
             <button class="btn-opt" onclick="setMs(3000, this)">3s</button>
             <button class="btn-opt" onclick="setMs(5000, this)">5s</button>
             <button class="btn-opt" onclick="setMs(10000, this)">10s</button>
@@ -122,14 +96,14 @@
     <div class="card" id="transfer-area" style="display:none;">
         <input type="file" id="file-input" multiple style="width: 100%; margin-bottom: 15px;">
         <div id="progress-container" style="display:none;">
-            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom:5px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold;">
                 <span id="pct">0%</span>
                 <span id="speed">AGUARDANDO...</span>
             </div>
             <div class="progress-track"><div id="progress-bar"></div></div>
-            <div id="status-text" style="font-size: 11px; opacity: 0.6; margin-top:5px;">Pronto</div>
+            <div id="config-label" style="font-size: 11px; opacity: 0.6; text-align: center;">Pronto para injetar dados</div>
         </div>
-        <button id="send-btn" class="btn-main" onclick="sendAll()">Enviar Tudo</button>
+        <button id="send-btn" class="btn-main" onclick="sendAll()">Iniciar Transferência</button>
         <button id="stop-btn" class="btn-main" onclick="cancelTransfer()">🛑 Parar Envio</button>
     </div>
 
@@ -151,9 +125,8 @@
         function setupConn() {
             document.getElementById('transfer-area').style.display = 'block';
             conn.on('data', d => {
-                if(d.full) { 
-                    save(new Blob([d.full], {type:d.type}), d.name); 
-                } else if(d.file) {
+                if(d.full) { save(new Blob([d.full], {type:d.type}), d.name); }
+                else if(d.file) {
                     if(!received[d.name]) received[d.name] = [];
                     received[d.name].push(d.file);
                     if(d.last) { save(new Blob(received[d.name], {type:d.type}), d.name); delete received[d.name]; }
@@ -163,92 +136,56 @@
 
         function save(b, n) { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; a.click(); }
 
-        // Configurações
-        function setChunk(v, b) { 
-            chunkVal = v; 
-            nitro = false; 
-            reset('.grid-opt .btn-opt', b); 
-            document.getElementById('nitro-btn').classList.remove('active'); 
-        }
-        function setMs(v, b) { msVal = v; reset('.grid-opt .btn-opt', b); }
-        
-        function setNitro(b) { 
-            nitro = !nitro; 
-            b.classList.toggle('active');
-            // Remove seleção dos chunks se nitro ativar
-            if(nitro) document.querySelectorAll('.grid-opt .btn-opt').forEach(x => x.classList.remove('active'));
-            // Se desativar nitro, volta pro padrão 256KB visualmente
-            else document.querySelectorAll('.grid-opt .btn-opt')[2].classList.add('active');
-        }
-
-        function reset(s, b) { document.querySelectorAll(s).forEach(x => x.classList.remove('active')); b.classList.add('active'); }
+        function setChunk(v, b) { chunkVal = v; nitro = false; resetGrp('.grid-opt:first-of-type .btn-opt', b); document.getElementById('nitro-btn').classList.remove('active'); updateDatalabel(); }
+        function setMs(v, b) { msVal = v; resetGrp('.grid-opt:last-of-type .btn-opt', b); updateDatalabel(); }
+        function setNitro(b) { nitro = !nitro; b.classList.toggle('active'); if(nitro) { document.querySelectorAll('.grid-opt:first-of-type .btn-opt').forEach(x => x.classList.remove('active')); } updateDatalabel(); }
+        function resetGrp(s, b) { document.querySelectorAll(s).forEach(x => x.classList.remove('active')); b.classList.add('active'); }
+        function updateDatalabel() { document.getElementById('config-label').innerText = `Motor: ${nitro?'NITRO':chunkVal/1024+'KB'} | UI: ${msVal}ms`; }
 
         async function sendFile(f) {
             isCancelled = false;
-            const pContainer = document.getElementById('progress-container');
             const pBar = document.getElementById('progress-bar');
-            const pText = document.getElementById('pct');
-            const spdText = document.getElementById('speed');
-            
-            pContainer.style.display = 'block';
+            document.getElementById('progress-container').style.display = 'block';
             document.getElementById('send-btn').style.display = 'none';
             document.getElementById('stop-btn').style.display = 'block';
 
             if(nitro) {
-                // MODO LOOP VISUAL
-                pBar.className = 'loop-bar'; // Ativa a animação listrada
-                pText.innerText = "NITRO";
-                spdText.innerText = "ENVIANDO BLOCO ÚNICO...";
-                document.getElementById('status-text').innerText = "O navegador pode congelar brevemente...";
-                
-                // Pequeno delay para a UI atualizar antes de travar no envio
+                pBar.className = 'loop-bar';
+                document.getElementById('speed').innerText = "NITRO INJECTING...";
                 await new Promise(r => setTimeout(r, 100));
-                
                 conn.send({ full: f, name: f.name, type: f.type });
-                
-                // Finalização imediata visual (pois não temos chunks)
-                pBar.className = ''; 
-                pBar.style.width = '100%';
-                pBar.style.backgroundColor = '#34c759';
-                spdText.innerText = "ENVIADO!";
-                
+                pBar.className = ''; pBar.style.width = '100%';
+                document.getElementById('speed').innerText = "ENVIADO!";
             } else {
-                // MODO CHUNK PADRÃO
-                pBar.className = ''; // Remove loop
-                pBar.style.backgroundColor = 'var(--blue)';
-                
+                pBar.className = ''; pBar.style.width = '0%';
                 let offset = 0, start = Date.now(), lastUp = 0;
                 while(offset < f.size) {
                     if(isCancelled) break;
                     const chk = f.slice(offset, offset + chunkVal);
                     conn.send({ file: await chk.arrayBuffer(), name: f.name, type: f.type, size: f.size, last: (offset + chunkVal >= f.size) });
                     offset += chunkVal;
-                    
                     let now = Date.now();
                     if(now - lastUp > msVal || offset >= f.size) {
                         let bps = offset / ((now - start) / 1000);
                         let pct = Math.round((offset/f.size)*100);
                         pBar.style.width = pct + '%';
-                        pText.innerText = pct + '%';
-                        spdText.innerText = (bps/1024/1024).toFixed(1) + " MB/s";
-                        document.getElementById('status-text').innerText = `Enviando partes de ${chunkVal/1024}KB`;
+                        document.getElementById('pct').innerText = pct + '%';
+                        document.getElementById('speed').innerText = (bps/1024/1024).toFixed(1) + " MB/s";
                         lastUp = now;
                     }
                 }
             }
-            resetUI();
+            if(!isCancelled) { document.getElementById('send-btn').style.display = 'block'; document.getElementById('stop-btn').style.display = 'none'; }
         }
 
-        function cancelTransfer() { isCancelled = true; }
-        function resetUI() { 
+        function cancelTransfer() { 
+            isCancelled = true; 
             document.getElementById('send-btn').style.display = 'block'; 
-            document.getElementById('stop-btn').style.display = 'none';
-            // Reseta a barra visualmente se foi cancelado
-            if(isCancelled) {
-                document.getElementById('progress-bar').style.width = '0%';
-                document.getElementById('progress-bar').className = '';
-                document.getElementById('speed').innerText = "CANCELADO";
-            }
+            document.getElementById('stop-btn').style.display = 'none'; 
+            document.getElementById('progress-bar').style.width = '0%'; 
+            document.getElementById('progress-bar').className = ''; 
+            document.getElementById('file-input').value = "";
+            alert("Transferência Cancelada.");
         }
 
         async function sendAll() {
@@ -264,9 +201,8 @@
             r.style.display = 'block';
             html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-                const url = new URL(text);
-                const id = url.searchParams.get("join");
-                html5QrCode.stop().then(() => { r.style.display = 'none'; connect(id); });
+                const url = new URL(text); connect(url.searchParams.get("join"));
+                html5QrCode.stop().then(() => { r.style.display = 'none'; });
             }).catch(() => {});
         }
     </script>
